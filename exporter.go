@@ -160,6 +160,16 @@ func (e *CoordimapExporter) ExportSpans(ctx context.Context, spans []trace.ReadO
 				allElements = append(allElements, parentRelElem)
 
 				continue
+			} else if string(attribute.Key) == cmotel.SpanAttrTargetService {
+				parentRelElem, errParentRelElem := CreateRelationship(span.Name(), attribute.Value.AsString(), cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, span.EndTime())
+				if errParentRelElem != nil {
+					// TODO: log sth here
+					continue
+				}
+
+				allElements = append(allElements, parentRelElem)
+
+				continue
 			}
 
 			// check if the attribute is a coordimap component
