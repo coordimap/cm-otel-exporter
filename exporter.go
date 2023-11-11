@@ -144,67 +144,25 @@ func (e *CoordimapExporter) ExportSpans(ctx context.Context, spans []trace.ReadO
 			}
 		}
 
-		for _, attribute := range span.Attributes() {
-			// check if the attribute is coordimap specific
-			if !strings.HasPrefix(string(attribute.Key), "coordimap.") {
+		// get all relationships found in the span
+		allElements = append(allElements, getSpanRelationships(attrMap, span.Name(), span.EndTime())...)
+
+		// check for spancomponent
+		if componentData, ok := attrMap[cmotel.SpanAttrComponent]; ok {
+			var spanComponent cmotel.CMComponent
+			errSpanComponent := json.Unmarshal([]byte(componentData), &spanComponent)
+			if errSpanComponent != nil {
+				// TODO: log here
 				continue
 			}
 
-			fmt.Println(attribute.Key)
-
-			// check if the attribute is a coordimap relationship
-			if string(attribute.Key) == cmotel.SpanAttrRelationship {
-				// generate a parent relationship element
-				parentVals := strings.Split(attribute.Value.AsString(), "@@@")
-				spanRelElem, errSpanRelElem := CreateRelationship(parentVals[1], span.Name(), cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, span.EndTime())
-				if errSpanRelElem != nil {
-					// TODO: log sth here
-					continue
-				}
-
-				allElements = append(allElements, spanRelElem)
-
-				continue
-			} else if string(attribute.Key) == cmotel.SpanAttrParentName {
-				parentRelElem, errParentRelElem := CreateRelationship(attribute.Value.AsString(), span.Name(), cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, span.EndTime())
-				if errParentRelElem != nil {
-					// TODO: log sth here
-					continue
-				}
-
-				allElements = append(allElements, parentRelElem)
-
-				continue
-			} else if string(attribute.Key) == cmotel.SpanAttrTargetService {
-				parentRelElem, errParentRelElem := CreateRelationship(span.Name(), attribute.Value.AsString(), cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, span.EndTime())
-				if errParentRelElem != nil {
-					// TODO: log sth here
-					continue
-				}
-
-				allElements = append(allElements, parentRelElem)
-
+			elem, errElem := CreateElement(spanComponent, spanComponent.Name, spanComponent.InternalID, cmotel.ComponentType, span.EndTime())
+			if errElem != nil {
+				// TODO: log sth here
 				continue
 			}
 
-			// check if the attribute is a coordimap component
-			if strings.HasPrefix(string(attribute.Key), cmotel.SpanAttrComponent) {
-				// get data and unmarshal
-				var spanComponent cmotel.CMComponent
-				errSpanComponent := json.Unmarshal([]byte(attribute.Value.AsString()), &spanComponent)
-				if errSpanComponent != nil {
-					// TODO: log here
-					continue
-				}
-
-				elem, errElem := CreateElement(spanComponent, spanComponent.Name, spanComponent.InternalID, cmotel.ComponentType, span.EndTime())
-				if errElem != nil {
-					// TODO: log sth here
-					continue
-				}
-
-				allElements = append(allElements, elem)
-			}
+			allElements = append(allElements, elem)
 		}
 	}
 

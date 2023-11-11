@@ -75,3 +75,8 @@ type DataSource struct {
 	Info   DataSourceInfo   `json:"data_source_info"`
 	Config DataSourceConfig `json:"data_source_config"`
 }
+
+type customComponent struct {
+	OptionalAttributes  []string
+	MandatoryAttributes []string
+}

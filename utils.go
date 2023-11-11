@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	cmotel "github.com/coordimap/cm-otel-go"
@@ -148,6 +149,55 @@ func getRelationshipsFromResourceAttributes(attrs []attribute.KeyValue, existing
 
 }
 
-func loadComponent() {
+func getSpanRelationships(attrMap map[string]string, spanName string, endTime time.Time) []*Element {
+	allFoundRelationships := []*Element{}
 
+	// check for spanattrrelationship
+	if value, ok := attrMap[cmotel.SpanAttrRelationship]; ok {
+		// generate a parent relationship element
+		parentVals := strings.Split(value, "@@@")
+		spanRelElem, errSpanRelElem := CreateRelationship(parentVals[1], spanName, cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, endTime)
+		if errSpanRelElem == nil {
+			allFoundRelationships = append(allFoundRelationships, spanRelElem)
+		}
+	}
+
+	// check for spanparentname
+	if value, ok := attrMap[cmotel.SpanAttrParentName]; ok {
+		parentRelElem, errParentRelElem := CreateRelationship(value, spanName, cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, endTime)
+		if errParentRelElem == nil {
+			allFoundRelationships = append(allFoundRelationships, parentRelElem)
+		}
+	}
+
+	// check for spanattrtargetservice
+	if value, ok := attrMap[cmotel.SpanAttrTargetService]; ok {
+		parentRelElem, errParentRelElem := CreateRelationship(spanName, value, cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, endTime)
+		if errParentRelElem == nil {
+			allFoundRelationships = append(allFoundRelationships, parentRelElem)
+		}
+	}
+
+	return allFoundRelationships
 }
+
+// func getComponentFromAttributes(attrMap map[string]string) (*Element, error) {
+// 	supportedComponents := map[string]customComponent{}
+// 	supportedComponents[componentType] = customComponent{
+// 		MandatoryAttributes: []string{},
+// 		OptionalAttributes:  []string{},
+// 	}
+
+// 	// TODO:
+// 	for componentType, value := range supportedComponents {
+// 		// TODO: check if componentType is in attrMap
+
+// 		// TODO: check if all the MandatoryAttributes are set
+
+// 		// TODO: load any optional attributes that are found
+
+// 		// TODO: create the element and return from here as there will only be one component from a span
+// 	}
+
+// 	return nil, nil
+// }
