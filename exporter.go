@@ -107,6 +107,20 @@ func (e *CoordimapExporter) ExportSpans(ctx context.Context, spans []trace.ReadO
 	foundRelationshipIDs := map[string]string{}
 
 	for _, span := range spans {
+		/**
+		1. create a map from the key/value pairs
+		2. check if the map contains the relationships
+		3. check if the map contains a component
+			- get the type of the component
+			- check if the map contains all the required fields
+			- get all the optional fields
+		*/
+
+		attrMap := map[string]string{}
+		for _, attr := range span.Attributes() {
+			attrMap[string(attr.Key)] = attr.Value.AsString()
+		}
+
 		newRelationships := getRelationshipsFromResourceAttributes(span.Resource().Attributes(), foundRelationshipIDs)
 
 		if len(newRelationships) > 0 {
@@ -125,6 +139,7 @@ func (e *CoordimapExporter) ExportSpans(ctx context.Context, spans []trace.ReadO
 					}
 
 					allElements = append(allElements, spanRelElem)
+					break
 				}
 			}
 		}
