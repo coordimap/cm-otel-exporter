@@ -120,8 +120,21 @@ func getRelationshipsFromResourceAttributes(attrs []attribute.KeyValue, existing
 
 	// compile the relationships
 	for _, relFromTo := range relationshipKeysToAdd {
-		if shouldCreateNewRelationship(mappedVars[relFromTo.From], mappedVars[relFromTo.To], existingRelationshipIDs) {
-			newRel, errNewRel := CreateRelationship(mappedVars[relFromTo.From], mappedVars[relFromTo.To], cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, time.Now())
+		// check if from or to are empty strings then continue
+		if relFromTo.From == "" || relFromTo.To == "" {
+			continue
+		}
+
+		from, fromExists := mappedVars[relFromTo.From]
+		to, toExists := mappedVars[relFromTo.To]
+
+		// check if the keys exists in the map and they are not empty
+		if !(fromExists && toExists) && (mappedVars[from] != "" && mappedVars[to] != "") {
+			continue
+		}
+
+		if shouldCreateNewRelationship(mappedVars[from], mappedVars[to], existingRelationshipIDs) {
+			newRel, errNewRel := CreateRelationship(mappedVars[from], mappedVars[to], cmotel.OtelComponentRelationship, cmotel.ComponentRelationshipSkipInsert, time.Now())
 			if errNewRel != nil {
 				// TODO: log sth here
 			} else {
@@ -132,5 +145,9 @@ func getRelationshipsFromResourceAttributes(attrs []attribute.KeyValue, existing
 	}
 
 	return newFoundRelationships
+
+}
+
+func loadComponent() {
 
 }
