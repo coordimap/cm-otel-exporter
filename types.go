@@ -39,11 +39,13 @@ type DataSourceConfig struct {
 	ValuePairs []KeyValue `json:"value_pairs"`
 }
 
+// KeyValue holds a key value information
 type KeyValue struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
+// RelationshipElement holds information about the relationship between two elements
 type RelationshipElement struct {
 	SourceID         string `json:"source_id"`
 	DestinationID    string `json:"destination_id"`
@@ -71,6 +73,7 @@ type CrawledData struct {
 	Data []*Element `json:"data"`
 }
 
+// DataSource holds information about this specific data source
 type DataSource struct {
 	Info   DataSourceInfo   `json:"data_source_info"`
 	Config DataSourceConfig `json:"data_source_config"`
@@ -79,4 +82,9 @@ type DataSource struct {
 type customComponent struct {
 	OptionalAttributes  []string
 	MandatoryAttributes []string
+}
+
+// SubmitOtelCrawlDataRequest The request data sent by the otel exporter
+type SubmitOtelCrawlDataRequest struct {
+	CloudCrawlData CloudCrawlData `json:"cloud_crawl_data"`
 }
