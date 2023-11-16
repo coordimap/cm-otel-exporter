@@ -156,7 +156,7 @@ func (e *CoordimapExporter) ExportSpans(ctx context.Context, spans []trace.ReadO
 				continue
 			}
 
-			elem, errElem := CreateElement(spanComponent, spanComponent.Name, spanComponent.InternalID, cmotel.ComponentType, span.EndTime())
+			elem, errElem := CreateElement(spanComponent, spanComponent.Name, spanComponent.InternalID, spanComponent.Type, span.EndTime())
 			if errElem != nil {
 				// TODO: log sth here
 				continue
