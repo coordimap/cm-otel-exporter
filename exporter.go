@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-const defaultCoordimapEndpointURL = "https://collector.coordimap.com"
+const defaultCoordimapEndpointURL = "https://api.coordimap.com/collector/crawlers/otel"
 
 // CoordimapExporter is a custom OpenTelemetry span exporter that sends spans to an HTTP endpoint.
 type CoordimapExporter struct {
