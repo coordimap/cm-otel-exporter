@@ -184,7 +184,11 @@ func (e *CoordimapExporter) ExportSpans(ctx context.Context, spans []trace.ReadO
 		CrawlInternalID: "otel-coordimap-exporter",
 	}
 
-	traceDataBytes, err := json.Marshal(dataToSend)
+	requestData := SubmitOtelCrawlDataRequest{
+		CloudCrawlData: *dataToSend,
+	}
+
+	traceDataBytes, err := json.Marshal(requestData)
 	if err != nil {
 		return err
 	}
